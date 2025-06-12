@@ -78,6 +78,7 @@ function simulateShooter(cfg, bankroll, logArr) {
   const comeOut = comeOutResult();
   let oddsRisk = 0;
   let payout = 0;
+  let risk = betAmount;
 
   const isComeOutLoss = comeOut === 7 || comeOut === 11;
   const isComeOutWin = comeOut === 2 || comeOut === 3;
@@ -86,16 +87,16 @@ function simulateShooter(cfg, bankroll, logArr) {
   if (isComeOutLoss) {
     bankroll -= betAmount;
     logArr.push(`CO ${comeOut}: Lose $${betAmount}`);
-    return bankroll;
+    return { bankroll, risk };
   }
   if (isComeOutWin) {
     bankroll += betAmount;
     logArr.push(`CO ${comeOut}: Win $${betAmount}`);
-    return bankroll;
+    return { bankroll, risk };
   }
   if (isPush) {
     logArr.push(`CO 12: Push`);
-    return bankroll;
+    return { bankroll, risk };
   }
 
   // Point established
@@ -103,8 +104,10 @@ function simulateShooter(cfg, bankroll, logArr) {
   const behavior = pointStates[point] || "keep";
   if (behavior === "lower") {
     betAmount = reducedBet;
+    risk = betAmount;
   } else if (behavior === "odds") {
     oddsRisk = betAmount * oddsMult;
+    risk = betAmount + oddsRisk;
   }
 
   // At this stage we cannot change the original wager; for simplicity we keep both bet + odds at risk
@@ -132,19 +135,51 @@ function simulateShooter(cfg, bankroll, logArr) {
     }
     logArr.push(`Point ${point} hit: Lose $${betAmount + oddsRisk}`);
   }
-  return bankroll;
+  return { bankroll, risk };
 }
 
 function runSimulation(cfg) {
   let bankroll = 0;
   const bankrollHistory = [bankroll];
   const logArr = [];
+  let totalRisk = 0;
+  let wins = 0;
+  let losses = 0;
+  let winStreak = 0;
+  let lossStreak = 0;
+  let maxWinStreak = 0;
+  let maxLossStreak = 0;
   for (let i = 0; i < cfg.iterations; i++) {
-    bankroll = simulateShooter(cfg, bankroll, logArr);
+    const prev = bankroll;
+    const res = simulateShooter(cfg, bankroll, logArr);
+    bankroll = res.bankroll;
     bankrollHistory.push(bankroll);
+    totalRisk += res.risk;
+    const diff = bankroll - prev;
+    if (diff > 0) {
+      wins++;
+      winStreak++;
+      lossStreak = 0;
+      if (winStreak > maxWinStreak) maxWinStreak = winStreak;
+    } else if (diff < 0) {
+      losses++;
+      lossStreak++;
+      winStreak = 0;
+      if (lossStreak > maxLossStreak) maxLossStreak = lossStreak;
+    } else {
+      winStreak = 0;
+      lossStreak = 0;
+    }
   }
   renderChart(bankrollHistory);
-  showStats(bankrollHistory);
+  showStats({
+    history: bankrollHistory,
+    totalRisk,
+    wins,
+    losses,
+    maxWinStreak,
+    maxLossStreak,
+  });
   logEl.textContent = logArr.slice(0, 100).join("\n");
 }
 
@@ -243,7 +278,8 @@ Chart.register({
   }
 });
 
-function showStats(history) {
+function showStats(data) {
+  const { history, totalRisk, wins, losses, maxWinStreak, maxLossStreak } = data;
   const final = history[history.length - 1];
   const max = Math.max(...history);
   let min = Math.min(...history);
@@ -256,9 +292,14 @@ function showStats(history) {
     if (dd > maxDD) maxDD = dd;
   });
 
+  const roi = totalRisk ? (final / totalRisk) * 100 : 0;
+  const ratio = losses ? (wins / losses).toFixed(2) : "∞";
+
   statsEl.innerHTML = `
     <h3>Results</h3>
     <p>Final Profit/Loss: <strong>$${final.toFixed(2)}</strong></p>
+    <p>ROI: ${roi.toFixed(2)}% | Win/Loss: ${wins}/${losses} (${ratio})</p>
+    <p>Longest Win Streak: ${maxWinStreak} | Longest Loss Streak: ${maxLossStreak}</p>
     <p>Max Profit: $${max.toFixed(2)} | Max Drawdown: $${maxDD.toFixed(2)} | Min: $${min.toFixed(2)}</p>
   `;
 }
