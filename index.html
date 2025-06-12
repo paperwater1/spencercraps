@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Craps Strategy Simulator</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <h1>Craps Strategy Simulator</h1>
+  <p id="strategySentence" class="strategy"></p>
+  <section class="controls">
+    <label>
+      Iterations:
+      <input type="number" id="iterations" value="1000" min="1" step="100" />
+    </label>
+    <label>
+      Base Do‒Not‒Pass Bet ($):
+      <input type="number" id="baseBet" value="100" min="1" />
+    </label>
+    <label>
+      Reduced Bet ($) when point is 5/6/8/9:
+      <input type="number" id="reducedBet" value="5" min="1" />
+    </label>
+    <label>
+      Odds Multiplier on 4/10 (×):
+      <input type="number" id="oddsMult" value="3" min="0" step="0.5" />
+    </label>
+    <div id="pointChips" class="chips" aria-label="Points for reduced bet"></div>
+    <div class="key">
+      <span class="chip keep small"></span> Keep &nbsp;
+      <span class="chip odds small"></span> Take Odds &nbsp;
+      <span class="chip lower small"></span> Lower
+    </div>
+    <button id="runBtn">Run</button>
+    <button id="resetBtn">Reset</button>
+  </section>
+
+  <section class="chart-container">
+    <canvas id="bankrollChart" width="900" height="400"></canvas>
+  </section>
+
+  <section class="stats" id="stats"></section>
+
+  <details class="log-wrap">
+    <summary>Roll Log (first 100 entries)</summary>
+    <pre id="log"></pre>
+  </details>
+
+  <script src="main.js"></script>
+</body>
+</html>
