@@ -298,6 +298,7 @@ function showStats(data) {
   statsEl.innerHTML = `
     <h3>Results</h3>
     <p>Final Profit/Loss: <strong>$${final.toFixed(2)}</strong></p>
+    <p>Total Wagered: $${totalRisk.toFixed(2)}</p>
     <p>ROI: ${roi.toFixed(2)}% | Win/Loss: ${wins}/${losses} (${ratio})</p>
     <p>Longest Win Streak: ${maxWinStreak} | Longest Loss Streak: ${maxLossStreak}</p>
     <p>Max Profit: $${max.toFixed(2)} | Max Drawdown: $${maxDD.toFixed(2)} | Min: $${min.toFixed(2)}</p>
