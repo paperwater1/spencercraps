@@ -16,7 +16,7 @@ h1{
 }
 @media(min-width:600px){
 .chip{width:44px;height:44px;}
-.controls button{width:auto;}
+.controls button{width:auto;grid-column:auto;}
   body{padding:2rem;}
   h1{font-size:2rem;}
   .controls{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));}
@@ -42,6 +42,19 @@ h1{
   padding:.5rem;
   font-size:1rem;
   width:100%;
+}
+
+.controls button{
+  padding:.75rem;
+  font-size:1.1rem;
+  font-weight:600;
+  background:#0a84ff;
+  color:#fff;
+  border:none;
+  border-radius:4px;
+  cursor:pointer;
+  width:100%;
+  grid-column:1/-1;
 }
 .key{
   display:flex;
@@ -71,7 +84,8 @@ h1{
 }
 .chart-container canvas{
   width:100%!important;
-  height:400px!important;
+  height:auto!important;
+  aspect-ratio:9/4;
   display:block;
 }
 .stats{
